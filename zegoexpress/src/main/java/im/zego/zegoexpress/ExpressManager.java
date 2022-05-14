@@ -4,6 +4,9 @@ import android.app.Application;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.TextureView;
+
+import com.alibaba.fastjson.JSON;
+
 import im.zego.zegoexpress.callback.IZegoEventHandler;
 import im.zego.zegoexpress.callback.IZegoRoomLoginCallback;
 import im.zego.zegoexpress.callback.IZegoRoomSetRoomExtraInfoCallback;
@@ -31,6 +34,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ExpressManager {
+
+    public static final String ROOM_EXTRA_INFO_KEY = "SYC_USER_INFO";
 
     private ExpressManager() {
     }
@@ -433,8 +438,12 @@ public class ExpressManager {
     }
 
     public void setRoomExtraInfo(String key, String value, IZegoRoomSetRoomExtraInfoCallback callback) {
-        Log.d(TAG, "setRoomExtraInfo() called with: key = [" + key + "], value = [" + value + "]");
-        ZegoExpressEngine.getEngine().setRoomExtraInfo(roomID, key, value, new IZegoRoomSetRoomExtraInfoCallback() {
+        //CO_HOST_ID, userID,callback
+        HashMap<String, String> map = new HashMap<>();
+        map.put(key, value);
+        String infoStr = JSON.toJSONString(map);
+        Log.d(TAG, "setRoomExtraInfo() called with: key = [" + key + "], value = [" + value + "]" + "roomExtraInfoStr = " + infoStr);
+        ZegoExpressEngine.getEngine().setRoomExtraInfo(roomID, ROOM_EXTRA_INFO_KEY, infoStr, new IZegoRoomSetRoomExtraInfoCallback() {
             @Override
             public void onRoomSetRoomExtraInfoResult(int errorCode) {
                 Log.d(TAG, "onRoomSetRoomExtraInfoResult() called with: errorCode = [" + errorCode + "]");

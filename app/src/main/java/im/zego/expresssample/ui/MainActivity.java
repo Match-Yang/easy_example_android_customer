@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.alibaba.fastjson.JSON;
 import im.zego.expresssample.databinding.ActivityMainBinding;
 import im.zego.zegoexpress.ExpressManager;
 import im.zego.zegoexpress.ExpressManager.ExpressManagerHandler;
@@ -18,14 +19,16 @@ import im.zego.zegoexpress.constants.ZegoUpdateType;
 import im.zego.zegoexpress.entity.ZegoRoomExtraInfo;
 import im.zego.zegoexpress.entity.ZegoUser;
 import java.util.ArrayList;
+import java.util.Set;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String CO_HOST_ID = "coHostID";
     public static final String HOST_ID = "hostID";
+
     private ActivityMainBinding binding;
-    private static final String TAG = "LoginActivity";
+    private static final String TAG = "MainActivity";
     /**
      * join as host or not
      */
@@ -97,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean selected = v.isSelected();
+                Log.d(TAG, "cohostBtn onClick: " + selected);
                 if (selected) {
                     if (localParticipant.userID.equals(coHostID)) {
                         leaveCoHostLive();
@@ -161,16 +165,21 @@ public class MainActivity extends AppCompatActivity {
                 for (ZegoRoomExtraInfo info : roomExtraInfoList) {
                     Log.d(TAG, "onRoomExtraInfoUpdate() called with: info.key = [" + info.key + "], info.value = ["
                         + info.value + "]");
-                    if (HOST_ID.equals(info.key)) {
-                        hostID = info.value;
-                        if (!joinAsHost) {
-                            // if join as audience,play host's video view in fullview
-                            setRenderToView(hostID, true, false);
+                    String extraInfo = info.value;
+                    com.alibaba.fastjson.JSONObject extraObj = JSON.parseObject(extraInfo);
+                    Set<String> keyArr = extraObj.keySet();
+                    for (String key : keyArr){
+                        if (HOST_ID.equals(key)) {
+                            hostID = (String) extraObj.get(key);
+                            if (!joinAsHost) {
+                                // if join as audience,play host's video view in fullview
+                                setRenderToView(hostID, true, false);
+                            }
                         }
-                    }
-                    if (CO_HOST_ID.equals(info.key)) {
-                        coHostID = info.value;
-                        setRenderToView(coHostID, false, false);
+                        if (CO_HOST_ID.equals(key)) {
+                            coHostID = (String) extraObj.get(key);;
+                            setRenderToView(coHostID, false, false);
+                        }
                     }
                 }
             }
@@ -183,9 +192,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void leaveCoHostLive() {
+        Log.d(TAG, "leaveCoHostLive: ");
         ExpressManager.getInstance().setRoomExtraInfo(CO_HOST_ID, "", new IZegoRoomSetRoomExtraInfoCallback() {
             @Override
             public void onRoomSetRoomExtraInfoResult(int i) {
+                Log.d(TAG, "onRoomSetRoomExtraInfoResult: ");
                 coHostID = "";
                 setRenderToView(coHostID, false, true);
 
@@ -204,10 +215,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void joinLiveAsCoHost(String userID) {
+        Log.d(TAG, "joinLiveAsCoHost: ");
         ExpressManager.getInstance().setRoomExtraInfo(CO_HOST_ID, userID,
             new IZegoRoomSetRoomExtraInfoCallback() {
                 @Override
                 public void onRoomSetRoomExtraInfoResult(int errorCode) {
+                    Log.d(TAG, "onRoomSetRoomExtraInfoResult: " + errorCode);
                     if (errorCode == 0) {
                         coHostID = userID;
                         setRenderToView(coHostID, false, true);

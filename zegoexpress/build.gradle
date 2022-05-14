@@ -30,5 +30,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.6.0'
 
     api 'com.github.zegolibrary:express-video:2.18.1'
+    api 'com.alibaba:fastjson:1.2.59'
     api 'com.guolindev.permissionx:permissionx:1.6.1'
 }
