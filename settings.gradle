@@ -4,6 +4,7 @@ pluginManagement {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+        maven { url 'https://maven.faceunity.com/repository/maven-public/' }
     }
 }
 dependencyResolutionManagement {
@@ -12,6 +13,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
+        maven { url 'https://maven.faceunity.com/repository/maven-public/' }
     }
 }
 rootProject.name = "ExpressSample"
