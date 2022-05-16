@@ -61,7 +61,32 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onJoinPrivateCallClicked(){
-
+        if (!checkAppID()) {
+            Toast.makeText(getApplication(),
+                    "please set your appID to AppCenter.java", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!validateInput()) {
+            Toast.makeText(getApplication(),
+                    "input cannot be null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        PermissionX.init(LoginActivity.this)
+                .permissions(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+                .request((allGranted, grantedList, deniedList) -> {
+                    if (allGranted) {
+                        int mediaOptions = ZegoMediaOptions.autoPlayAudio | ZegoMediaOptions.autoPlayVideo | ZegoMediaOptions.publishLocalAudio | ZegoMediaOptions.publishLocalVideo;
+                        joinRoom(binding.joinRoomId.getText().toString(), mediaOptions, new IZegoRoomLoginCallback() {
+                            @Override
+                            public void onRoomLoginResult(int errorCode, JSONObject jsonObject) {
+                                if (errorCode == 0) {
+                                    Intent intent = new Intent(LoginActivity.this, CallActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                        });
+                    }
+                });
     }
 
     private void onJoinRoomClicked(boolean asHost) {
@@ -79,7 +104,12 @@ public class LoginActivity extends AppCompatActivity {
             .permissions(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
             .request((allGranted, grantedList, deniedList) -> {
                 if (allGranted) {
-                    joinRoom(binding.joinRoomId.getText().toString(), asHost, new IZegoRoomLoginCallback() {
+                    int mediaOptions = ZegoMediaOptions.autoPlayAudio | ZegoMediaOptions.autoPlayVideo;
+                    if (asHost) {
+                        mediaOptions = mediaOptions |
+                                ZegoMediaOptions.publishLocalAudio | ZegoMediaOptions.publishLocalVideo;
+                    }
+                    joinRoom(binding.joinRoomId.getText().toString(), mediaOptions, new IZegoRoomLoginCallback() {
                         @Override
                         public void onRoomLoginResult(int errorCode, JSONObject jsonObject) {
                             if (errorCode == 0) {
@@ -93,18 +123,16 @@ public class LoginActivity extends AppCompatActivity {
             });
     }
 
-    private void joinRoom(String roomID, boolean joinAsHost, IZegoRoomLoginCallback callback) {
+    private void joinRoom(String roomID, int mediaOptions, IZegoRoomLoginCallback callback) {
         binding.loginLoading.setVisibility(View.VISIBLE);
+        // TODO we use random user id for test
         Random random = new Random(System.currentTimeMillis());
         String userID = System.currentTimeMillis() + "";
         String username = Build.MANUFACTURER + random.nextInt(2048);
         ZegoUser user = new ZegoUser(userID, username);
+        // TODO request the token via your backend service
         String token = ExpressManager.generateToken(userID, AppCenter.appID, AppCenter.serverSecret);
-        int mediaOptions = ZegoMediaOptions.autoPlayAudio | ZegoMediaOptions.autoPlayVideo;
-        if (joinAsHost) {
-            mediaOptions = mediaOptions |
-                ZegoMediaOptions.publishLocalAudio | ZegoMediaOptions.publishLocalVideo;
-        }
+
         ExpressManager.getInstance().joinRoom(roomID, user, token, mediaOptions, new IZegoRoomLoginCallback() {
             @Override
             public void onRoomLoginResult(int errorCode, JSONObject jsonObject) {

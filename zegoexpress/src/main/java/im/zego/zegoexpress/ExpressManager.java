@@ -438,7 +438,6 @@ public class ExpressManager implements FURenderer.OnTrackingStatusChangedListene
             "playStream() called with: autoPlayVideo = [" + autoPlayVideo + "], autoPlayAudio = [" + autoPlayAudio
                 + "]");
         if (autoPlayAudio || autoPlayVideo) {
-            ZegoParticipant participant = streamUserMap.get(streamID);
             startPlayStream(streamID, generateCanvas(textureView));
             if (!autoPlayVideo) {
                 ZegoExpressEngine.getEngine().mutePlayStreamVideo(streamID, true);
@@ -540,7 +539,6 @@ public class ExpressManager implements FURenderer.OnTrackingStatusChangedListene
     }
 
     public interface ExpressManagerHandler {
-
         void onRoomUserUpdate(String roomID, ZegoUpdateType updateType, ArrayList<ZegoUser> userList);
 
         void onRoomUserDeviceUpdate(ZegoDeviceUpdateType updateType, String userID, String roomID);
