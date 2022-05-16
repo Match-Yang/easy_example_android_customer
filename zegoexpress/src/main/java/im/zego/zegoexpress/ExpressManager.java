@@ -1,30 +1,40 @@
 package im.zego.zegoexpress;
 
 import android.app.Application;
+import android.graphics.SurfaceTexture;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.TextureView;
 
 import com.alibaba.fastjson.JSON;
 
+import im.zego.zegoexpress.callback.IZegoCustomVideoProcessHandler;
 import im.zego.zegoexpress.callback.IZegoEventHandler;
 import im.zego.zegoexpress.callback.IZegoRoomLoginCallback;
 import im.zego.zegoexpress.callback.IZegoRoomSetRoomExtraInfoCallback;
 import im.zego.zegoexpress.constants.ZegoPlayerState;
+import im.zego.zegoexpress.constants.ZegoPublishChannel;
 import im.zego.zegoexpress.constants.ZegoPublisherState;
 import im.zego.zegoexpress.constants.ZegoRemoteDeviceState;
 import im.zego.zegoexpress.constants.ZegoRoomStateChangedReason;
 import im.zego.zegoexpress.constants.ZegoScenario;
 import im.zego.zegoexpress.constants.ZegoStreamQualityLevel;
 import im.zego.zegoexpress.constants.ZegoUpdateType;
+import im.zego.zegoexpress.constants.ZegoVideoBufferType;
 import im.zego.zegoexpress.constants.ZegoViewMode;
 import im.zego.zegoexpress.entity.ZegoCanvas;
+import im.zego.zegoexpress.entity.ZegoCustomVideoProcessConfig;
 import im.zego.zegoexpress.entity.ZegoEngineConfig;
 import im.zego.zegoexpress.entity.ZegoEngineProfile;
+import im.zego.zegoexpress.entity.ZegoPublishStreamQuality;
 import im.zego.zegoexpress.entity.ZegoRoomConfig;
 import im.zego.zegoexpress.entity.ZegoRoomExtraInfo;
 import im.zego.zegoexpress.entity.ZegoStream;
 import im.zego.zegoexpress.entity.ZegoUser;
+import im.zego.zegoexpress.faceu.faceunity.FURenderer;
+import im.zego.zegoexpress.faceu.faceunity.view.BeautyControlView;
+import im.zego.zegoexpress.faceu.process.VideoFilterByProcess2;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +43,7 @@ import java.util.Objects;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ExpressManager {
+public class ExpressManager implements FURenderer.OnTrackingStatusChangedListener {
 
     public static final String ROOM_EXTRA_INFO_KEY = "SYC_USER_INFO";
 
@@ -59,14 +69,23 @@ public class ExpressManager {
     private int mediaOptions;
     private String roomID;
     private ExpressManagerHandler handler;
+    private FURenderer mFURenderer;
+    private Application mApp;
+    private VideoFilterByProcess2 videoFilterByProcess;
+
+    public Application getApplication() {
+        return mApp;
+    }
 
     public void createEngine(Application application, long appID) {
+        mApp = application;
         ZegoEngineProfile profile = new ZegoEngineProfile();
         profile.appID = appID;
         profile.scenario = ZegoScenario.COMMUNICATION;
         profile.application = application;
         ZegoEngineConfig config = new ZegoEngineConfig();
         ZegoExpressEngine.setEngineConfig(config);
+        Log.d(TAG, "debug>>>  createEngine: ");
         ZegoExpressEngine.createEngine(profile, new IZegoEventHandler() {
             @Override
             public void onRoomUserUpdate(String roomID, ZegoUpdateType updateType, ArrayList<ZegoUser> userList) {
@@ -201,6 +220,13 @@ public class ExpressManager {
                     + "], errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
             }
 
+
+            @Override
+            public void onPublisherQualityUpdate(String s, ZegoPublishStreamQuality zegoPublishStreamQuality) {
+                super.onPublisherQualityUpdate(s, zegoPublishStreamQuality);
+                Log.d(TAG, "onPublisherQualityUpdate: " + JSON.toJSONString(zegoPublishStreamQuality));
+            }
+
             @Override
             public void onPlayerStateUpdate(String streamID, ZegoPlayerState state, int errorCode,
                 JSONObject extendedData) {
@@ -209,6 +235,58 @@ public class ExpressManager {
                     + "], errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
             }
         });
+        initFaceU();
+    }
+
+    public void initFaceU(){
+        FURenderer.initFURenderer(mApp);
+        mFURenderer = new FURenderer
+                .Builder(mApp)
+                .maxFaces(4)
+                .inputTextureType(0)
+                .setOnTrackingStatusChangedListener(this)
+                .build();
+
+        videoFilterByProcess = new VideoFilterByProcess2(mFURenderer);
+        ZegoCustomVideoProcessConfig zegoCustomVideoProcessConfig = new ZegoCustomVideoProcessConfig();
+        zegoCustomVideoProcessConfig.bufferType = ZegoVideoBufferType.GL_TEXTURE_2D;
+        Log.d(TAG, "debug>>> enableCustomVideoProcessing: ");
+        ZegoExpressEngine.getEngine().enableCustomVideoProcessing(true,zegoCustomVideoProcessConfig);
+        ZegoExpressEngine.getEngine().setCustomVideoProcessHandler(videoFilterByProcess);
+        /*
+        ZegoExpressEngine.getEngine().setCustomVideoProcessHandler(new IZegoCustomVideoProcessHandler() {
+            @Override
+            public void onStart(ZegoPublishChannel zegoPublishChannel) {
+                super.onStart(zegoPublishChannel);
+                Log.d(TAG, "debug>>> onStart: ");
+            }
+
+            @Override
+            public void onStop(ZegoPublishChannel zegoPublishChannel) {
+                super.onStop(zegoPublishChannel);
+                Log.d(TAG, "debug>>> onStop: ");
+            }
+
+            @Override
+            public void onCapturedUnprocessedTextureData(int i, int i1, int i2, long l, ZegoPublishChannel zegoPublishChannel) {
+                super.onCapturedUnprocessedTextureData(i, i1, i2, l, zegoPublishChannel);
+                ZegoExpressEngine.getEngine().sendCustomVideoProcessedTextureData(i,i1,i2,l,zegoPublishChannel);
+            }
+
+
+        });
+
+         */
+    }
+
+
+    public void setBeautyControlView(BeautyControlView view){
+        view.setOnFUControlListener(mFURenderer);
+    }
+
+    @Override
+    public void onTrackingStatusChanged(int status) {
+
     }
 
     public void joinRoom(String roomID, ZegoUser zegoUser, String token, int mediaOptions,
@@ -276,6 +354,7 @@ public class ExpressManager {
 
         participantMap.put(participant.userID, participant);
         streamUserMap.put(participant.streamID, participant);
+        Log.d(TAG, "debug>>> startPreview: ");
         ZegoExpressEngine.getEngine().startPreview(generateCanvas(textureView));
     }
 
@@ -348,6 +427,7 @@ public class ExpressManager {
         streamUserMap.clear();
         streamViewMap.clear();
         ZegoExpressEngine.getEngine().logoutRoom();
+        videoFilterByProcess.stopAndDeAllocate();
     }
 
     public void playStream(String streamID, TextureView textureView) {

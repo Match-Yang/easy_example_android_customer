@@ -18,6 +18,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main.assets.srcDirs += ['src/main/assets', 'src/main/effects/bundle', 'src/main/makeup/material']
+        main.res.srcDirs += ['src/main/res', 'src/main/effects/res', 'src/main/makeup/res']
+        main.jniLibs.srcDir(["libs"])
+
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -28,7 +36,7 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.6.0'
-
+    implementation files('libs/nama.jar')
     api 'com.github.zegolibrary:express-video:2.18.1'
     api 'com.alibaba:fastjson:1.2.59'
     api 'com.guolindev.permissionx:permissionx:1.6.1'
