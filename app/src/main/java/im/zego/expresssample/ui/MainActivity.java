@@ -18,6 +18,8 @@ import im.zego.zegoexpress.constants.ZegoRoomStateChangedReason;
 import im.zego.zegoexpress.constants.ZegoUpdateType;
 import im.zego.zegoexpress.entity.ZegoRoomExtraInfo;
 import im.zego.zegoexpress.entity.ZegoUser;
+import im.zego.zegoexpress.faceu.faceunity.view.BeautyControlView;
+
 import java.util.ArrayList;
 import java.util.Set;
 import org.json.JSONObject;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean joinAsHost;
     private String hostID = "";
     private String coHostID = "";
+    private BeautyControlView beautyControlView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        beautyControlView = binding.fuBeautyControl;
         joinAsHost = getIntent().getBooleanExtra("asHost", false);
         ZegoParticipant localParticipant = ExpressManager.getInstance().getLocalParticipant();
         if (joinAsHost) {
@@ -116,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
         ExpressManager.getInstance().setExpressHandler(new ExpressManagerHandler() {
             @Override
             public void onRoomUserUpdate(String roomID, ZegoUpdateType updateType, ArrayList<ZegoUser> userList) {
@@ -189,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject extendedData) {
             }
         });
+        ExpressManager.getInstance().setBeautyControlView(beautyControlView);
     }
 
     private void leaveCoHostLive() {

@@ -68,9 +68,19 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent" />
 
+
+  <im.zego.zegoexpress.faceu.faceunity.view.BeautyControlView
+      android:id="@+id/fu_beauty_control"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/x98"
+      app:layout_constraintBottom_toTopOf="@id/control_view"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"/>
+
   <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+      android:id="@+id/control_view"
     app:layout_constraintBottom_toTopOf="@id/logout_room">
 
     <ImageView
