@@ -10,11 +10,14 @@ ZEGOCLOUD's easy example is a simple wrapper around our RTC product. You can ref
 * Create a project in [ZEGOCLOUD Admin Console](https://console.zegocloud.com/). For details, see [ZEGO Admin Console - Project management](https://docs.zegocloud.com/article/1271).
 
 ###  Clone the repository
-1. Clone the easy example Github repository,and checkout to `live_streaming` branch
+1. Clone the easy example Github repository
 
 ### Modify the project configurations
 ![](media/16496764650900/16496772462635.png)
 You need to modify `appID` and `serverSecret` to your own account, which can be obtained in the [ZEGO Admin Console](https://console.zegocloud.com/).
+
+### Change faceunity `authpack` file
+![](media/16496764650900/authpack.jpg)
 
 ### Run the sample code
 
@@ -27,7 +30,7 @@ You need to modify `appID` and `serverSecret` to your own account, which can be 
 ### Introduce SDK
 1. In your project's settings.gradle file, add the jitpack maven .
 ``` groovy
-    pluginManagement {
+pluginManagement {
     repositories {
         
         maven { url 'https://www.jitpack.io' }
