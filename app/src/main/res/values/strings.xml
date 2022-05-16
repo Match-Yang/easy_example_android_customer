@@ -13,4 +13,6 @@
   <string name="room_id">Room ID</string>
   <string name="join_live_as_host">Join Live as Host</string>
   <string name="join_live_as_audience">Join Live as Audience</string>
+  <string name="join_private_call">Join Private Call</string>
+
 </resources>

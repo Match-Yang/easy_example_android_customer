@@ -43,6 +43,13 @@ public class LoginActivity extends AppCompatActivity {
                 onJoinRoomClicked(false);
             }
         });
+
+        binding.joinVideoCall.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onJoinPrivateCallClicked();
+            }
+        });
     }
 
     private void initZEGOExpressSDK() {
@@ -51,6 +58,10 @@ public class LoginActivity extends AppCompatActivity {
             .permissions(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
             .request((allGranted, grantedList, deniedList) -> {
             });
+    }
+
+    private void onJoinPrivateCallClicked(){
+
     }
 
     private void onJoinRoomClicked(boolean asHost) {
