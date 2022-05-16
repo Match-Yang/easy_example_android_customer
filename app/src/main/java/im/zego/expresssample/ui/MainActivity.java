@@ -190,7 +190,19 @@ public class MainActivity extends AppCompatActivity {
             public void onRoomStateChanged(String roomID, ZegoRoomStateChangedReason reason, int errorCode,
                 JSONObject extendedData) {
             }
+
+            @Override
+            public void onFaceDetected(Boolean hasFace) {
+                String tip = "";
+                if (hasFace){
+                    tip = "Detect face!";
+                }else{
+                    tip = "Don't detect face!";
+                }
+                Toast.makeText(MainActivity.this,tip,Toast.LENGTH_SHORT).show();
+            }
         });
+
         ExpressManager.getInstance().setBeautyControlView(beautyControlView);
     }
 

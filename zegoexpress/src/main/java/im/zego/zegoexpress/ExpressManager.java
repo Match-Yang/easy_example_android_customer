@@ -286,7 +286,8 @@ public class ExpressManager implements FURenderer.OnTrackingStatusChangedListene
 
     @Override
     public void onTrackingStatusChanged(int status) {
-
+        Log.d(TAG, "onTrackingStatusChanged: " + status);
+        handler.onFaceDetected(status == 1);
     }
 
     public void joinRoom(String roomID, ZegoUser zegoUser, String token, int mediaOptions,
@@ -550,5 +551,7 @@ public class ExpressManager implements FURenderer.OnTrackingStatusChangedListene
 
         void onRoomStateChanged(String roomID, ZegoRoomStateChangedReason reason, int errorCode,
             JSONObject extendedData);
+
+        void onFaceDetected(Boolean hasFace);
     }
 }
